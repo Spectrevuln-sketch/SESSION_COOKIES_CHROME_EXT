@@ -1,0 +1,30 @@
+{
+  "manifest_version": 3,
+  "name": "Talentlytcia Coda",
+  "version": "1.0.0",
+  "icons": {
+    "16": "talentlytica.png",
+    "48": "talentlytica.png",
+    "128": "talentlytica.png"
+  },
+  "description": "Talentlytcia Coda Extentions Time Tracker Workflow",
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Talentlytcia Coda",
+    "default_icon": "talentlytica.png"
+  },
+  "options_page": "options.html",
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "contentScript.js"
+      ]
+    }
+  ]
+}

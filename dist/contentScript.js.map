@@ -1,0 +1,1 @@
+{"version":3,"file":"contentScript.js","mappings":";;;;;AAAA;AACA;AACA","sources":["webpack://talent-coda/./src/contentScript/contentScript.ts"],"sourcesContent":["chrome.runtime.sendMessage(\"From Content Script\", (response) => {\n    console.log(response);\n});\n"],"names":[],"sourceRoot":""}
