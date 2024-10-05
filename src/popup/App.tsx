@@ -1,7 +1,13 @@
 import React, { useEffect, useState } from 'react'
 import Header from './components/Header/Header'
-import { GetTableData } from '../utils/api'
+import { getCurrentUser, GetTableData } from '../utils/api'
 import DataTable from 'react-data-table-component';
+import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import Login from './pages/Auth/Login';
+import Shareing from './pages/Dashboard/Shareing';
+import { useShareing } from './pages/Dashboard/Shareing/hooks/useShareing';
+import { getStoredToken, setFormData, setStoredToken } from '@utils/storage';
+import Register from './pages/Auth/Register';
 
 
 interface ValueTaskType {
@@ -21,114 +27,86 @@ interface TaskType {
 }
 
 const App: React.FC<{}> = () => {
-  const [ListTimeTracker, setListTimeTracker] = useState<any[]>([])
-  const [TaskData, setTaskData] = useState<any[]>([])
-  const [ListRow, setListRow] = useState<any[]>([])
-  const [selectTask, setSelectTask] = useState<string>('')
+  const [token, setToken] = useState<string>("")
+  const [loading, setLoading] = useState<boolean>(true);
+
   useEffect(() => {
-    getTableData();
-
-  }, [])
-
-  const getTableData = () => {
-    GetTableData().then(res => {
-      let Task: TaskType[] = []
-      const ListValue = res.map(data => Object.assign({}, {
-        id: data.id,
-        ...data.values
-      }))
-      setListRow(res)
-      res.map(async (dataTracker, idx) => {
-        const pattrenTask = new RegExp(`${dataTracker.values.Task}*`)
-        if (Task.length > 0) {
-          if (Task.filter(task => pattrenTask.test(task.data) === true).length > 0) {
-            return
-          } else {
-            Task.push({
-              id: dataTracker.id,
-              data: dataTracker.values.Task
-            })
-          }
-        } else {
-          Task.push({
-            id: dataTracker.id,
-            data: dataTracker.values.Task
+    const messageListener = (message: any, sender: chrome.runtime.MessageSender, sendResponse: (response?: any) => void) => {
+      console.log('message', message.action)
+      if (message.action === 'contentWebActive' || message.action === 'getTabInfo') {
+        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        console.log('token data>>>', token)
+        const tab = tabs[0];
+        if (tab) {
+          // contentWebActive
+          sendResponse({
+            title: tab.title,
+            faviconUrl: tab.favIconUrl,
+            url: tab.url
+          });
+          console.log('Title', tab.title)
+          console.log('faviconUrl', tab.favIconUrl)
+          console.log('url', tab.url)
+          setFormData({
+            title: tab.title,
+            faviconUrl: tab.favIconUrl,
+            url: tab.url
           })
+        } else {
+          sendResponse({ error: 'Tidak ada tab aktif' });
         }
-      })
+      });
 
-      setListTimeTracker(ListValue.filter(timeTrack => timeTrack.Task.toUpperCase() !== 'PROTOTYPING'))
-      setTaskData(Task.filter(task => task.data.toUpperCase() !== 'PROTOTYPING'))
-      setSelectTask(Task.shift().data)
-    }).catch(err => {
-      console.log("Error:", err)
-      return alert("Sedang Ada Gangguan Dari Coda Mohon Di Tunggu")
+      }
+    };
+
+    // Listen to messages from the background script
+    chrome.runtime.onMessage.addListener(messageListener);
+
+    // Cleanup listener on component unmount
+    return () => {
+      chrome.runtime.onMessage.removeListener(messageListener);
+    };
+  },[]);
+
+
+
+  useEffect(() => {
+    getStoredToken().then(isLoginToken => {
+      setToken(isLoginToken)
+      setLoading(false);
     })
-  }
-  console.log("==============ListRow==================", ListRow)
-  const columns = [
-    {
-      name: 'Category',
-      selector: row => row.Category,
-    },
-    {
-      name: 'Task',
-      selector: row => row.Task,
-    },
-    {
-      name: 'Clock in',
-      selector: row => {
-        const ClockIn = JSON.parse(row["Clock in"])
-        console.log(ClockIn.disabled)
-        return (
-          <ClockIn.formatType disabled={ClockIn.disabled} className={ClockIn.disabled ? "bg-slate-300 rounded-md p-2 font-semibold" : "bg-green-300 rounded-md p-2 font-semibold"}>Clock in</ClockIn.formatType>
-        )
-      },
-    },
-    {
-      name: 'Clock out',
-      selector: row => {
-        const ClockOut = JSON.parse(row["Clock out"])
-        return (
-          <ClockOut.formatType disabled={ClockOut.disabled} className={ClockOut.disabled ? "bg-slate-300 rounded-md p-2 font-semibold" : "bg-red-300 rounded-md p-2 font-semibold"}>Clock Out</ClockOut.formatType>
-        )
-      },
-    },
-    {
-      name: 'Total today',
-      selector: row => row["Total today"],
-    },
-    {
-      name: 'Current duration',
-      selector: row => row["Current duration"],
-    },
-  ];
+    getCurrentUser()
+  }, [token])
 
-
+    if (loading) {
+      return <div>Loading...</div>;
+    }
 
   return (
-    <div className='flex flex-1 flex-col'>
-      <Header title="Time Tracker Coda" />
-      {/* content */}
-      <div className='p-2'>
+      <>
 
-        <div className='flex flex-1 flex-row font-semibold justify-start items-center gap-2 outline-none'>
-          <p>Choose Task : </p>
-          {TaskData && TaskData.length > 0 && (
-            <select className='bg-slate-300 p-1 rounded-md' onChange={(e) => setSelectTask(e.target.value)}>
-              {TaskData.map((item, index) => (
-                <option key={item.id} value={item.data}>{item.data}</option>
-              ))}
-            </select>
-          )}
-        </div>
-        <DataTable
-          columns={columns}
-          data={ListTimeTracker.filter(timeTrack => new RegExp(`${selectTask}`).test(timeTrack.Task))}
-          selectableRows={false}
-        />
-      </div>
-    </div>
+        {/* Content */}
+        <Router>
+          <Routes>
+          <Route
+            path="/"
+            element={
+              token === '' || token === null ? (
+                <Navigate to="/login" replace />
+              ):(
+                <Navigate to="/share/dashboard" replace />
+              )
+            }
+          />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/share/dashboard" element={<Shareing />} />
+          </Routes>
+        </Router>
+        {/* End Content */}
+
+      </>
   )
 }
 

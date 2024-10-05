@@ -4,8 +4,14 @@
     "module": "es6",
     "target": "es6",
     "moduleResolution": "node",
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "paths": {
+      "@configs/*": ["./src/configs/*"],
+      "@utils/*": ["./src/utils/*"]
+    },
+    "typeRoots": ["./src/types", "./node_modules/@types"],
   },
+  "ts-node": { "esm": true,   },
   "include": [
     "src/**/*.ts",
     "src/**/*.tsx"

@@ -1,19 +1,36 @@
 {
   "manifest_version": 3,
-  "name": "Talentlytcia Coda",
+  "name": "Session Cookies Share",
   "version": "1.0.0",
   "icons": {
-    "16": "talentlytica.png",
-    "48": "talentlytica.png",
-    "128": "talentlytica.png"
+    "16": "session_cookies.png",
+    "48": "session_cookies.png",
+    "128": "session_cookies.png"
   },
-  "description": "Talentlytcia Coda Extentions Time Tracker Workflow",
+  "description": "Session Cookies Share Extentions Time Tracker Workflow",
   "action": {
     "default_popup": "popup.html",
-    "default_title": "Talentlytcia Coda",
-    "default_icon": "talentlytica.png"
+    "default_title": "Session Cookies Share",
+    "default_icon": "session_cookies.png"
   },
   "options_page": "options.html",
+  "host_permissions": [
+    "http://*/*",
+    "https://*/*"
+  ],
+  "permissions": [
+  "cookies",
+  "proxy",
+  "webRequest",
+  "activeTab",
+  "scripting",
+  "storage",
+  "declarativeContent",
+  "bookmarks",
+  "browsingData",
+  "contentSettings",
+  "tabs"
+],
   "background": {
     "service_worker": "background.js"
   },

@@ -4,6 +4,7 @@ const HtmlPlugin = require('html-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const autoprefixer = require('autoprefixer');
 const tailwindcss = require('tailwindcss');
+const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
 module.exports = {
   entry: {
     popup: path.resolve('src/popup/popup.tsx'),
@@ -41,7 +42,16 @@ module.exports = {
     ]
   },
   resolve: {
-    extensions: ['.tsx', '.ts', '.js']
+    extensions: ['.tsx', '.ts', '.js'],
+    alias: {
+      '@configs': path.resolve(__dirname, 'src/configs'), // Correct the alias path
+      '@utils': path.resolve(__dirname, 'src/utils'), // Correct the alias path
+    },
+    plugins: [
+      new TsconfigPathsPlugin({
+        configFile: './tsconfig.json', // Ensure it uses your tsconfig.json
+      }),
+    ],
   },
   plugins: [
     new CleanWebpackPlugin({
@@ -73,7 +83,7 @@ module.exports = {
 
 function getHtmlPlugins(chunks) {
   return chunks.map(chunk => new HtmlPlugin({
-    title: 'Talentlytcia Coda',
+    title: 'Session Cookies',
     filename: `${chunk}.html`,
     chunks: [chunk]
   }))

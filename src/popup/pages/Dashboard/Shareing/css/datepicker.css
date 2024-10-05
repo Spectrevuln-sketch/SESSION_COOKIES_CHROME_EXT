@@ -1,0 +1,16 @@
+.datePickerContainer {
+  width: 50px; /* Adjust width as needed */
+  height: 50px; /* Adjust height as needed */
+}
+
+
+.react-datepicker__triangle {
+  display: none;
+}
+
+.react-datepicker__header-container,
+.react-datepicker__month-container,
+.react-datepicker__day-container {
+  width: 100% !important; /* Ensure full width */
+  height: 100% !important; /* Ensure full height */
+}
